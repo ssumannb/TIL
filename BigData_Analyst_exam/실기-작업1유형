@@ -1,0 +1,148 @@
+- **표준편차** 구하기 : np.std, DataFrame.std()
+    
+    ```python
+    std = np.std(df['col_name'])
+    std = df['col_name'].std()
+    ```
+    
+- **분산** 구하기 : np.var
+    
+    ```python
+    var = np.var(df['col_name'])
+    
+    # NaN 값을 무시하고 분산을 계산하는 함수
+    nanvar = np.nanvar(df['col_name'])
+    ```
+    
+- 🔴**결측치** 확인 및 제거/대체
+    
+    ```python
+    # **결측치 확인**
+    df.isnull().sum()
+    '''
+    col1   결측치 개수
+    col2   결측치 개수
+    .
+    .
+    .
+    '''
+    ```
+    
+    ```python
+    **# 결측치 제거하기**
+    df.dropna() # 결측값이 있는 행 삭제
+    df.dropna(subset=['col_name']) **# 결측값이 있는 열 삭제**
+    ```
+    
+    ```python
+    **# 결측치 대체하기**
+    df.fillna({'col_name': df['col_name'].mean(), inplace=True})
+    df.fillna({'col1': 'type1', 'col2' : 'type2'})
+    ** inplace=True = 원본(결측치)를 보존하지 않고 그 자리에 대체값을 채움
+    
+    **# 앞의 데이터로 뒤의 결측치 제거**
+    df.fillna(method='ffill')
+    **# 뒤의 데이터로 앞의 결측치 제거**
+    df.fillna(method='bfill')
+    
+    ```
+    
+- 🔴**이상치** 확인 및 제거/대체 : **df.col.quantile(.25)**
+    
+    이상치 확인 방법 
+    
+    1. (simple) 주어진 값을 기준으로 loc 함수를 사용하여 인덱싱
+    
+    ```python
+    threshold = int(val)
+    
+    df_ideal = df.loc[df['col_name'] > threshold, 'col_name']
+    ```
+    
+    1. IQR 활용 방법 (IQR = Inter Quartile Range, 사분범위)
+        
+        ![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/1b8ca483-c7a3-46d1-a6a1-1574fc53e912/Untitled.png)
+        
+        **Pandas** 라이브러리를 활용한다.
+        
+        ```python
+        import pandas as pd
+        
+        Q1 = df['col_name'].quantile(.25)
+        Q2 = df['col_name'].quantile(.75)
+        
+        IQR = Q3 - Q1
+        thr_min = Q1 - 1.5 * IQR
+        thr_max = Q3 + 1.5 * IQR
+        
+        min_out = df[df['col_name'] < thr_min]
+        max_out = df[df['col_name'] > thr_max]
+        ```
+        
+- 소수점 **데이터 찾기,** **올림**, **내림**, **버림**, **반올림 :** np.ceil, np.floor, np.trunc
+    
+    내림과 버림의 차이는 음수에서 나타남(양수는 동일) 
+    
+    ```python
+    import numpy
+    
+    # 소수점 데이터 찾기
+    df = df[(df['col_name'] - np.floor(df['col_name'])) != 0]
+    
+    # 올림의 평균값
+    m_ceil = np.ceil(df['col_name']).mean()
+    
+    # 내림의 평균값
+    m_floor = np.floor(df['col_name']).mean()
+    
+    # 버림의 평균값
+    m_trunc = np.trunc(df['col_name']).mean()
+    ```
+    
+- 소수점 제거
+    
+    ```python
+    # 다양한 방법이 있겠지만..
+    # 0(default) 반올림 하기 전과 후의 값이 동일하다면
+    ex_decimal = df[(df['col_name'] == round(df['col_name'], 0))]
+    ```
+    
+- 상관계수 : df.corr
+    
+    
+- 표준화 (Standardization)
+    
+    ```python
+    from sklearn.preprocessin import StandardScaler
+    
+    scaler = StandardScaler()
+    # 데이터프레임 전체
+    scaler.fit(df)
+    df_scaled = scaler.transform(df)
+    
+    # 특정 컬럼
+    scaler.fit(df['col_name'])
+    df['col_name_scaled'] = scaler.transform(df['col_name'])
+    ```
+    
+
+- 그룹 분할 : pd.qcut(df[’col_name’], q=그룹수)
+    
+    ex) 동일한 개수로 ‘age’ 컬럼의 순서를 기준으로 3그룹으로 나눈 뒤 각 그룹의 중앙값을 더하시오
+    
+    ```python
+    # **코드**
+    pd.qcut(df['age'], q=3)
+    
+    **# 적용 예**
+    df['range'] = pd.qcut(df['age'], q=3, labels=['g1', 'g2', 'g3'])
+    
+    **# 각 그룹 별 수량 비교** 
+    df['range'].value_counts()
+    ```
+    
+- 중복 데이터 제거 : df.drop_duplicate(subset=[’col_name’]
+    
+    ```python
+    df = df.drop_duplicate(subset=['col_name'])
+    ```
