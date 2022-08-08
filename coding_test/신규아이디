@@ -1,0 +1,24 @@
+##### 프로그래머스 level 1
+구현 문제 - 신규 아이디
+###### 출처: 프로그래머스 코딩 테스트 연습, https://school.programmers.co.kr/learn/challenges
+
+```python
+import re
+
+def solution(new_id):
+    answer = ''
+    
+    step1 = new_id.lower()
+    step2 = re.sub('[^a-z0-9\.\-\_]+', '', step1)
+    step3 = re.sub('[\.]+', '.', step2)
+    step4 = re.sub('^\.|\.$','', step3)
+    step5 = "a" if len(step4) == 0 else step4
+    step6 = step5[:15] if len(step5) > 15 else step5
+    step6 = re.sub('\.$', '', step6)
+    step7 = step6
+    while(len(step7)<3):
+        step7 = f'{step7}{step7[-1]}'
+    answer = step7
+    
+    return answer
+```
